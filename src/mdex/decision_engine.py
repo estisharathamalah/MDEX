@@ -21,7 +21,7 @@ sequential (POMDP) solution is out of scope for this TRL-3 POC.
 from dataclasses import dataclass, field
 
 from .belief import BeliefState
-from .economics import EconomicModel
+from .economics import EconomicModel, ActionCost, ParamProvenance
 from .evidence import EvidenceItem
 from .information_value import CandidateAction, voi_for_information_action, expected_uncertainty_reduction
 
@@ -63,7 +63,19 @@ def evaluate_action(
     
     if is_information_gathering:
         # For information actions: VOI already includes cost subtraction
-        voi = voi_for_information_action(belief, action, all_candidate_actions, econ)
+        # Post-information, the only terminal decision available in this single-step model is "hold" (outside option)
+        # (Full POMDP with repeated decisions is TRL 4+ work; we use single-step lookahead here.)
+        terminal_decision_actions = [a for a in all_candidate_actions if a.kind == "hold"]
+        if not terminal_decision_actions:
+            # Fallback: create a synthetic hold action if not present
+            terminal_decision_actions = [CandidateAction(
+                name="hold",
+                kind="hold",
+                cost=ActionCost(0.0, 0, ParamProvenance.ASSUMPTION),
+                outcome_scenarios=[],
+                description="Outside option: stop and hold (value = 0)"
+            )]
+        voi = voi_for_information_action(belief, action, terminal_decision_actions, econ)
         total_value = voi
         action_value = 0.0  # not applicable for info actions
         action_type = "information-gathering"

@@ -66,23 +66,38 @@ def expected_uncertainty_reduction(belief: BeliefState, action: CandidateAction)
     return max(0.0, current_entropy - expected_posterior_entropy)
 
 
-def _best_action_value(belief: BeliefState, candidate_actions: list[CandidateAction], econ: EconomicModel) -> float:
+def _best_action_value(belief: BeliefState, terminal_actions: list[CandidateAction], econ: EconomicModel) -> float:
     """
-    Compute the value of the best feasible action under the current belief.
+    Compute the value of the best feasible TERMINAL action under the current belief.
     
-    Value of action a = EMV(belief, a) - cost(a)
+    Terminal actions are decision endpoints (drill, hold, stop) that produce economic payoffs.
+    Information-gathering actions (survey, geochemical sampling) are explicitly EXCLUDED
+    because they do not receive payoff_by_hypothesis; their value is computed separately via VOI.
     
-    Returns the maximum value over all feasible actions, or 0 if none are feasible.
+    Value of terminal action a = EMV(belief, a) - cost(a)
+    The 'hold' action (outside option) is treated as having value 0 by definition.
+    
+    Args:
+        belief: Current belief state
+        terminal_actions: Only terminal decision actions (drill, hold, stop)
+                         Must NOT include information-gathering actions
+        econ: Economic model
+    
+    Returns:
+        Maximum value over all feasible terminal actions, or 0 if none are feasible
+            or only 'hold' is available (outside option value = 0).
     """
-    if not candidate_actions:
+    if not terminal_actions:
         return 0.0
     
-    best_value = 0.0  # default: hold / do nothing
-    for action in candidate_actions:
+    best_value = 0.0  # default: hold / outside option = 0
+    for action in terminal_actions:
+        # Skip 'hold' (outside option has value 0 by definition)
+        if action.kind == "hold":
+            continue
         if not econ.feasible(action.cost):
             continue
         action_value = econ.expected_monetary_value(belief, action.cost)
-        # Note: econ.expected_monetary_value already subtracts cost
         best_value = max(best_value, action_value)
     
     return best_value
@@ -91,33 +106,47 @@ def _best_action_value(belief: BeliefState, candidate_actions: list[CandidateAct
 def voi_for_information_action(
     belief: BeliefState,
     information_action: CandidateAction,
-    follow_on_actions: list[CandidateAction],
+    terminal_actions: list[CandidateAction],
     econ: EconomicModel,
 ) -> float:
     """
     Compute the true decision-theoretic Value of Information (VOI) for an information-gathering action.
     
     VOI(information_action) 
-        = E_outcomes[ BestActionValue(posterior after outcome) ]
-          - BestActionValue(current belief)
+        = E_outcomes[ BestTerminalActionValue(posterior after outcome) ]
+          - BestTerminalActionValue(current belief)
           - cost(information_action)
     
-    where BestActionValue(belief) = max over feasible a in follow_on_actions of [EMV(belief, a) - cost(a)].
+    where BestTerminalActionValue(belief) = max over feasible terminal actions of [EMV(belief, a) - cost(a)].
+    
+    Critical constraint: terminal_actions must contain ONLY decision endpoints (drill, hold, stop).
+    It MUST NOT include the information_action itself or any other information-gathering actions.
+    Violations of this constraint lead to circular valuation where information actions wrongly
+    receive payoff_by_hypothesis as if they were terminal actions.
     
     Args:
         belief: Current belief state.
-        information_action: The action that gathers information (drill, survey, etc.).
-        follow_on_actions: The set of actions available AFTER the information is received.
-                          These must include the original candidate actions (so that "do nothing"
-                          remains an option if all other actions become unattractive).
+        information_action: The action that gathers information (geophysical_survey, geochemical_sampling, etc.).
+                           This is the action being valued, NOT included in terminal_actions.
+        terminal_actions: The set of TERMINAL decision actions available AFTER the information is received.
+                         Must include 'hold' (outside option) but NOT the information_action itself.
+                         Example: [drill_Southwest, drill_Central, hold].
         econ: Economic model with budget, payoffs, etc.
     
     Returns:
         Expected value of information in USD. Can be negative if the information is not valuable
-        or if the action is too expensive.
+        or if the action is too expensive. Already accounts for cost subtraction (not double-subtracted).
+    
+    Raises:
+        AssertionError: If information_action appears in terminal_actions (architecture violation).
     """
+    # Enforce architectural constraint: information action must not be in terminal_actions
+    assert all(action.name != information_action.name for action in terminal_actions), \
+        f"Architecture violation: information action '{information_action.name}' found in terminal_actions. " \
+        "Information actions are valued via VOI, not as terminal decision endpoints."
+    
     # Current best achievable value without the information
-    current_best_value = _best_action_value(belief, follow_on_actions, econ)
+    current_best_value = _best_action_value(belief, terminal_actions, econ)
     
     # Expected value after acquiring information
     expected_posterior_best_value = 0.0
@@ -132,7 +161,7 @@ def voi_for_information_action(
         posterior_belief = BeliefState(posterior=posterior)
         
         # What is the best action we can take with this posterior belief?
-        posterior_best_value = _best_action_value(posterior_belief, follow_on_actions, econ)
+        posterior_best_value = _best_action_value(posterior_belief, terminal_actions, econ)
         
         # Weight by outcome probability
         expected_posterior_best_value += p_outcome * posterior_best_value

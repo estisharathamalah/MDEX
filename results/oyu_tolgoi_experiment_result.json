@@ -18,11 +18,20 @@
       "uncertainty_reduction_bits": 1.834347166779827
     },
     {
+      "action": "additional_geophysical_survey",
+      "action_type": "information",
+      "feasible": true,
+      "total_value_usd": -60000.0,
+      "voi_usd": -60000.0,
+      "action_value_usd": 0.0,
+      "uncertainty_reduction_bits": 1.1764149603495744
+    },
+    {
       "action": "drill_Southern_Oyu",
       "action_type": "information",
       "feasible": true,
-      "total_value_usd": -250000.0000000298,
-      "voi_usd": -250000.0000000298,
+      "total_value_usd": -250000.0,
+      "voi_usd": -250000.0,
       "action_value_usd": 0.0,
       "uncertainty_reduction_bits": 0.35849965808293627
     },
@@ -30,8 +39,8 @@
       "action": "drill_Southwest_Oyu",
       "action_type": "information",
       "feasible": true,
-      "total_value_usd": -250000.0000000298,
-      "voi_usd": -250000.0000000298,
+      "total_value_usd": -250000.0,
+      "voi_usd": -250000.0,
       "action_value_usd": 0.0,
       "uncertainty_reduction_bits": 0.35849965808293627
     },
@@ -39,19 +48,10 @@
       "action": "drill_Central_Oyu",
       "action_type": "information",
       "feasible": true,
-      "total_value_usd": -250000.0000000298,
-      "voi_usd": -250000.0000000298,
+      "total_value_usd": -250000.0,
+      "voi_usd": -250000.0,
       "action_value_usd": 0.0,
       "uncertainty_reduction_bits": 0.35849965808293627
-    },
-    {
-      "action": "additional_geophysical_survey",
-      "action_type": "information",
-      "feasible": true,
-      "total_value_usd": -35138799.215458006,
-      "voi_usd": -35138799.215458006,
-      "action_value_usd": 0.0,
-      "uncertainty_reduction_bits": 1.1764149603495744
     }
   ],
   "mdex_recommendation": "hold",
