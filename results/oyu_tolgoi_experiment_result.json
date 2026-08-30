@@ -12,9 +12,9 @@
       "action": "hold",
       "action_type": "terminal",
       "feasible": true,
-      "total_value_usd": 231124278.7450915,
+      "total_value_usd": 0.0,
       "voi_usd": 0.0,
-      "action_value_usd": 231124278.7450915,
+      "action_value_usd": 0.0,
       "uncertainty_reduction_bits": 1.834347166779827
     },
     {

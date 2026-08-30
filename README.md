@@ -20,6 +20,7 @@ used throughout: `FACT`, `ASSUMPTION`, `SYNTHETIC`, `MODEL OUTPUT`.
 
 ```
 Evidence Store (temporal firewall) -> Belief Engine (Bayesian) ->
+  Information Actions -> outcomes -> posterior -> best Terminal Decision ->
   Information Value Engine (VOI) + Economic Engine (EMV, budget) ->
   Decision Engine (ranking) -> Replay Engine (sequential) -> Evaluation Engine
 ```
@@ -66,13 +67,14 @@ gap.
 ```bash
 python3 tests/test_temporal_firewall.py
 python3 tests/test_core_engine.py
+python3 tests/test_voi_correctness.py
 ```
 (or `pytest tests/` in an environment with pytest installed)
 
-9 automated tests currently pass, covering: the temporal firewall
-(mandatory), Bayesian belief update, action ranking, budget-constraint
-enforcement, sequential replay reproducibility, and baseline-comparison /
-disagreement reporting.
+13 automated tests currently pass, covering the temporal firewall
+(mandatory), Bayesian belief update, pre-posterior VOI including an
+analytical $5 decision-switch case, terminal-action selection, budget
+constraints, reproducibility, and baseline-comparison/disagreement reporting.
 
 ## Data sources
 

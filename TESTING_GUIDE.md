@@ -12,7 +12,7 @@ python tests/test_core_engine.py
 python tests/test_voi_correctness.py
 ```
 
-**Expected output:** 12/12 tests PASS ✅
+**Expected output:** 13/13 tests PASS ✅
 
 ---
 
@@ -43,7 +43,7 @@ All temporal firewall tests passed.
 
 ---
 
-### 2. Core Engine Tests (6 tests)
+### 2. Core Engine Tests (7 tests)
 **File:** `tests/test_core_engine.py`
 
 **Purpose:** Verify Bayesian belief update, action ranking, budget constraints, and reproducibility.
@@ -56,6 +56,7 @@ All temporal firewall tests passed.
 | `test_posterior_normalizes_and_entropy_bounds` | Probabilities sum to 1.0 ± tolerance; entropy ∈ [0, log₄] | Numerical soundness |
 | `test_action_ranking_respects_budget_feasibility` | Only feasible actions ranked; infeasible removed | Budget constraint enforcement |
 | `test_no_feasible_action_raises` | Error when no action fits budget | Edge case handling |
+| `test_information_action_uses_best_terminal_decision_after_outcome` | Information outcome selects A for H1 and B for H2 | End-to-end sequential VOI architecture |
 | `test_sequential_replay_is_reproducible` | Same inputs → same outputs (deterministic) | Reproducibility guarantee |
 | `test_baseline_evaluation_reports_disagreement_when_present` | Honestly report when MDEX differs from history | Transparency (not suppressed) |
 
@@ -70,6 +71,7 @@ PASS: test_bayesian_update_shifts_posterior_toward_favored_hypothesis
 PASS: test_posterior_normalizes_and_entropy_bounds
 PASS: test_action_ranking_respects_budget_feasibility
 PASS: test_no_feasible_action_raises
+PASS: test_information_action_uses_best_terminal_decision_after_outcome
 PASS: test_sequential_replay_is_reproducible
 PASS: test_baseline_evaluation_reports_disagreement_when_present
 All core engine tests passed.
@@ -135,7 +137,7 @@ test_voi_positive_with_decision_change: VOI = $5.00 (expected $5.00)
 - **MDEX recommendation:** hold (don't drill yet)
 - **Historical decision:** drill_Southwest_Oyu
 - **Outcome:** Historical decision succeeded (hit ore)
-- **Interpretation:** MDEX's recommendation **differs** from history. This is reported honestly (not suppressed). Why? Current belief + assumed payoffs + VOI calculation prioritize risk reduction over drilling cost. But history proved drilling right this time.
+- **Interpretation:** MDEX's recommendation **differs** from history. This is reported honestly. The current replay has no post-information terminal economic decision beyond `hold`, so information actions have cost-only VOI; this is a model-completeness limitation, not a conclusion about the historical choice.
 
 **Run it:**
 ```bash
@@ -148,7 +150,7 @@ Belief (posterior): { H1: 0.234, H2: 0.460, H3: 0.152, H4: 0.154 }
 Entropy: 1.834 bits
 
 Ranked actions:
-  hold                              Value=$231M  VOI=$0
+  hold                              Value=$0     VOI=$0
   geophysical_survey              Value=$-60k   VOI=$-60k
   drill_Southwest_Oyu             Value=$-250k  VOI=$-250k
   ... (other sites)
@@ -172,9 +174,9 @@ Agreement with history: False
 ```
 tests/
 ├── test_temporal_firewall.py      (3 tests) → MANDATORY INVARIANT
-├── test_core_engine.py             (6 tests) → CORE LOGIC
+├── test_core_engine.py             (7 tests) → CORE LOGIC
 ├── test_voi_correctness.py         (3 tests) → MATHEMATICAL PROOF
-└── ... (12 tests total)
+└── ... (13 tests total)
 
 experiments/
 └── run_oyu_tolgoi_experiment.py    (1 integration scenario)
@@ -193,12 +195,13 @@ experiments/
 | **Edge Cases** | test_core_engine.py | test_no_feasible_action_raises | ✅ PROVEN |
 | **Reproducibility** | test_core_engine.py | test_sequential_replay_is_reproducible | ✅ PROVEN |
 | **Honest Reporting** | test_core_engine.py | test_baseline_evaluation_reports_disagreement_... | ✅ PROVEN |
+| **Sequential VOI Integration** | test_core_engine.py | test_information_action_uses_best_terminal_decision_after_outcome | ✅ PROVEN |
 | **VOI Math (Negative)** | test_voi_correctness.py | test_voi_is_negative_when_... | ✅ PROVEN |
 | **VOI Math (Positive)** | test_voi_correctness.py | test_voi_positive_with_decision_change | ✅ PROVEN |
 | **VOI Math (Budget)** | test_voi_correctness.py | test_voi_respects_budget | ✅ PROVEN |
 | **Integration** | experiments/run_oyu_tolgoi_experiment.py | Full pipeline | ✅ PROVEN |
 
-**Total: 12 automated tests + 1 integration scenario = 13 validation points**
+**Total: 13 automated tests + 1 integration scenario = 14 validation points**
 
 ---
 
@@ -337,7 +340,7 @@ jobs:
 
 ## Summary
 
-✅ **12 automated tests** prove correctness
+✅ **13 automated tests** prove correctness
 ✅ **1 integration scenario** proves end-to-end function
 ✅ **All mathematically grounded** (not just heuristic)
 ✅ **Temporal firewall is mandatory and tested**

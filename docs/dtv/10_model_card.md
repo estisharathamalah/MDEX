@@ -21,7 +21,7 @@
 ### Primary Use Case
 Research demonstration of a computational system that:
 - Maintains an explicit probabilistic belief over competing geological hypotheses
-- Values candidate exploration actions by their expected reduction in decision-relevant uncertainty per unit cost
+- Values information actions by their expected impact on the best available subsequent terminal decision, net of cost
 - Produces traceable, reproducible exploration recommendations with full provenance documentation
 
 ### Intended Users
@@ -62,8 +62,8 @@ Single-point-in-time evaluation of mineral exploration options under geological 
 - Updated via discrete Bayes rule as evidence is introduced
 
 ### Action Set
-- Candidate exploration actions (drill sites, geophysical surveys, hold, etc.)
-- Each action specifies: cost (with provenance), outcome scenarios (enumerated, with likelihoods per hypothesis)
+- Information actions (drill sites, geophysical surveys, sampling) and terminal economic decisions (for example develop, farm-out, abandon, or hold)
+- Each action specifies: cost (with provenance), outcome scenarios (enumerated, with likelihoods per hypothesis), and an explicit or legacy-derived action role
 - Outcome scenarios are [ASSUMPTION] discretizations of continuous real-world assay/geophysical results
 
 ### Economic Model
@@ -98,7 +98,9 @@ Temporal Filter (at decision time T)
     ↓
 Bayesian Belief Engine (discrete update over H1..H4)
     ↓
-Information Value Engine (pre-posterior VOI calculation)
+    Information Actions -> outcomes -> posterior -> best Terminal Decision
+    ↓
+    Information Value Engine (pre-posterior VOI calculation)
     ↓
 Economic Engine (cost, budget, payoffs)
     ↓
@@ -124,11 +126,12 @@ Evaluation Engine (comparison with history and baselines)
 ### Algorithmic Simplifications
 - **Belief update:** Assumes evidence likelihoods can be authored per evidence type and per hypothesis; does not learn from data
 - **VOI calculation:** Single-step-lookahead discrete pre-posterior VOI; does not solve a full multi-period sequential (POMDP) optimization
-- **Action ranking:** Additive combination of VOI and EMV; other weighting schemes are possible and may be superior
+- **Action roles:** Information actions are not terminal payoff actions. VOI is `E[best terminal value after outcome] - best terminal value now - information cost`; `hold` is always the zero-valued outside option.
+- **Oyu Tolgoi terminal set:** The replay currently has only `hold` as a post-information terminal action, so it cannot establish an economic benefit from information until calibrated terminal decisions are supplied.
 - **No geophysical/economic data pipeline:** Ingestion is via structured JSON; no live integration with assay databases, geophysical sensors, or market data
 
 ### Validation & Testing
-- **Test coverage:** 9 automated tests covering core modules; no integration testing against multiple historical cases or domain-expert blind backtests
+- **Test coverage:** 13 automated tests covering core modules, including an analytical information-outcome-to-terminal-decision integration path; no multi-case historical or domain-expert blind backtest
 - **Baseline strategies:** Four simple heuristics compared; does not benchmark against published exploration decision frameworks or industry best practices
 - **Regret analysis:** No regret or opportunity-cost quantification against a true optimal policy (which is unknown)
 
@@ -151,7 +154,7 @@ Evaluation Engine (comparison with history and baselines)
 
 ### TRL 3 (Demonstrated)
 - ✅ Core algorithms (Bayesian belief, VOI, economics, ranking, replay) implemented in code
-- ✅ 9 automated tests pass, including mandatory temporal firewall proof
+- ✅ 13 automated tests pass, including mandatory temporal firewall proof and an analytical decision-switch VOI integration test
 - ✅ End-to-end pipeline runs on one historically-grounded scenario (Oyu Tolgoi, pre-OTD-150)
 - ✅ Output is documented, reproducible, and disagreement with history is reported honestly
 

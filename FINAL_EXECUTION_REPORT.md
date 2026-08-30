@@ -1,12 +1,12 @@
 # FINAL EXECUTION REPORT — MDEX TRL 3 Proof-of-Concept
 
 ## A. Executive result
-A working TRL 3 proof-of-concept was built: a sequential mineral-exploration decision engine implementing evidence storage with a structurally-enforced temporal information firewall, Bayesian belief updating over four competing geological hypotheses, a Value-of-Information engine, an exploration economics engine, a decision-ranking engine, a sequential replay engine, and a baseline-comparison evaluation engine. It was exercised end-to-end against one historically-grounded decision scenario (Oyu Tolgoi, pre-OTD-150, July 2001) with real cited macro-facts and clearly labeled synthetic discriminating data, and validated by 9 passing automated tests, including the mandatory proof that future information cannot influence a historical decision.
+A working TRL 3 proof-of-concept was built: a sequential mineral-exploration decision engine implementing evidence storage with a structurally-enforced temporal information firewall, Bayesian belief updating over four competing geological hypotheses, decision-theoretic pre-posterior Value-of-Information, exploration economics, action ranking, sequential replay, and baseline comparison. It was exercised end-to-end against one historically-grounded decision scenario (Oyu Tolgoi, pre-OTD-150, July 2001) with real cited macro-facts and clearly labeled synthetic discriminating data, and validated by 13 passing automated tests, including the mandatory proof that future information cannot influence a historical decision.
 
 **Constraint disclosed up front:** this build environment has no network access to GitHub, so the code could not be pushed to `estisharathamalah/MDEX` directly. All files are delivered for manual push or use with a tool that has git/GitHub access.
 
 ## B. Technical architecture
-Evidence Store (temporal firewall) → Belief Engine (discrete Bayes) → Information Value Engine (pre-posterior VOI) + Economic Engine (EMV, hard budget) → Decision Engine (ranking) → Replay Engine (sequential state transitions) → Evaluation Engine (baselines, regret, disagreement reporting). Full detail: `docs/architecture.md`. Code: `src/mdex/`.
+Evidence Store (temporal firewall) → Belief Engine (discrete Bayes) → Information Action outcomes → posterior belief → Best available Terminal Decision → decision-theoretic pre-posterior VOI net of cost → Economic Engine (hard budget) → Decision Engine (ranking) → Replay Engine → Evaluation Engine. `hold` is a zero-valued outside option; information actions are never terminal payoff actions. Full detail: `docs/architecture.md`. Code: `src/mdex/`.
 
 ## C. Experimental result
 One experiment (`experiments/run_oyu_tolgoi_experiment.py`) run successfully. MDEX's top recommendation (`additional_geophysical_survey`) **disagreed** with the historical decision (`drill_Southwest_Oyu`, the site that became discovery hole OTD-150). This disagreement is reported honestly rather than adjusted away — per the master prompt's explicit instruction — and is analyzed as a modeling-gap-driven artifact (the geophysical survey's outcome likelihoods were authored as non-discriminating across hypotheses, and the three drill sites' synthetic indication strengths were similar in magnitude) rather than as evidence that MDEX "beat" the historical geologists. Full output: `results/oyu_tolgoi_experiment_result.json`.
@@ -24,7 +24,7 @@ Candidate defensibility rests on the specific integration of a temporally-firewa
 - Single historical case, single decision point.
 - Per-site discriminating evidence in the primary experiment is synthetic, not sourced from real 2001 site-level geochemistry/geophysics (which was not obtainable in this session — see `docs/DATA_PROVENANCE.md`).
 - Likelihood tables and economic parameters are hand-authored `[ASSUMPTION]`s, not expert-elicited or corpus-fitted.
-- Decision rule is single-step-lookahead (true VOI for information actions, direct EMV for terminal actions), not a full sequential (POMDP) optimum.
+- Decision rule is single-step-lookahead (true VOI for information actions based on subsequent terminal decisions, direct EMV for terminal actions), not a full sequential (POMDP) optimum.
 - No market/customer validation has been conducted; `docs/dtv/04_market.md` states this explicitly rather than fabricating traction.
 
 ## H. Open issues

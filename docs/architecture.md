@@ -67,7 +67,8 @@
 ### `information_value.py`
 - `enumerate_outcomes(action, belief)`: for a candidate action, enumerate plausible evidence outcomes and their probabilities under current belief (a discretized pre-posterior).
 - `expected_uncertainty_reduction(action, belief) -> float`: expected drop in entropy.
-- `voi_for_information_action(belief, information_action, terminal_actions, econ) -> float`: true decision-theoretic Value of Information (VOI) in decision-value units (monetary), following the Howard (1966) pre-posterior construction: VOI = E[OptimalDecision(posterior)] - OptimalDecision(prior) - cost.
+- `CandidateAction.is_information_action`: explicit action-role marker. When omitted, legacy `drill_hole`, `geophysical_survey`, and `geochemical_sampling` kinds are information actions; `hold` and explicitly marked economic actions are terminal decisions.
+- `voi_for_information_action(belief, information_action, terminal_actions, econ) -> float`: decision-theoretic pre-posterior VOI: `E[BestTerminalDecisionValue(posterior)] - BestTerminalDecisionValue(prior) - cost`. Information actions never receive terminal payoff evaluation. `hold` is an outside option with value 0.
 
 ### `economics.py`
 - `ActionCost`: cost, duration, and a `provenance` tag (historical figure vs. `[ASSUMPTION]` default from `configs/economics.yaml`).
@@ -75,7 +76,7 @@
 - `feasible(action_cost, remaining_budget) -> bool`: hard budget constraint enforcement.
 
 ### `decision_engine.py`
-- `rank_actions(belief, candidate_actions, econ_model) -> List[ActionEvaluation]`, each item carrying: action, voi_usd (for information actions) or action_value_usd (for terminal actions), cost, expected uncertainty reduction, rationale (auto-generated text trace), assumptions used, evidence provenance list.
+- `rank_actions(belief, candidate_actions, econ_model) -> List[ActionEvaluation]`: builds the terminal-decision set from all non-information candidates, then values each information action against that set. Each item carries VOI (information actions) or direct terminal value (terminal actions), cost, expected uncertainty reduction, rationale, assumptions, and evidence provenance.
 - `recommend(...) -> ActionEvaluation`: top of the ranked list subject to budget feasibility.
 
 ### `replay.py`

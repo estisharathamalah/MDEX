@@ -4,7 +4,8 @@ Decision Engine — the critical technical function of MDEX.
 Given a belief state, a set of candidate actions, and an economic model,
 ranks actions by computing their true decision-theoretic value:
 
-For INFORMATION-GATHERING actions (kind = 'drill_hole', 'geophysical_survey', etc.):
+For INFORMATION-GATHERING actions (explicitly marked or legacy kinds such as
+'drill_hole' and 'geophysical_survey'):
   value = VOI (value of information) 
          = E[BestAction(posterior)] - BestAction(prior) - cost
          
@@ -23,7 +24,12 @@ from dataclasses import dataclass, field
 from .belief import BeliefState
 from .economics import EconomicModel, ActionCost, ParamProvenance
 from .evidence import EvidenceItem
-from .information_value import CandidateAction, voi_for_information_action, expected_uncertainty_reduction
+from .information_value import (
+    CandidateAction,
+    action_is_information,
+    expected_uncertainty_reduction,
+    voi_for_information_action,
+)
 
 
 
@@ -59,13 +65,15 @@ def evaluate_action(
     unc_reduction = expected_uncertainty_reduction(belief, action)
     
     # Determine action type and compute value
-    is_information_gathering = action.kind in ["drill_hole", "geophysical_survey", "geochemical_sampling"]
+    is_information_gathering = action_is_information(action)
     
     if is_information_gathering:
-        # For information actions: VOI already includes cost subtraction
-        # Post-information, the only terminal decision available in this single-step model is "hold" (outside option)
-        # (Full POMDP with repeated decisions is TRL 4+ work; we use single-step lookahead here.)
-        terminal_decision_actions = [a for a in all_candidate_actions if a.kind == "hold"]
+        # VOI already includes cost subtraction. Information is valued by the
+        # best available economic decision after each possible outcome.
+        terminal_decision_actions = [
+            candidate for candidate in all_candidate_actions
+            if not action_is_information(candidate)
+        ]
         if not terminal_decision_actions:
             # Fallback: create a synthetic hold action if not present
             terminal_decision_actions = [CandidateAction(
@@ -81,7 +89,7 @@ def evaluate_action(
         action_type = "information-gathering"
     else:
         # For terminal actions: direct EMV calculation
-        action_value = econ.expected_monetary_value(belief, action.cost)
+        action_value = 0.0 if action.kind == "hold" else econ.expected_monetary_value(belief, action.cost, action)
         total_value = action_value
         voi = 0.0  # not applicable for terminal actions
         action_type = "terminal"

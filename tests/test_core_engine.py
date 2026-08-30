@@ -66,7 +66,13 @@ def _simple_action(name, cost_usd, hit_h2_strength=0.8):
         Hypothesis.H3_LOCALIZED_NONECONOMIC: 0.9,
         Hypothesis.H4_INSUFFICIENT_EVIDENCE: 0.8,
     })
-    return CandidateAction(name=name, kind="drill_hole", cost=cost, outcome_scenarios=[hit, miss])
+    return CandidateAction(
+        name=name,
+        kind="develop",
+        cost=cost,
+        outcome_scenarios=[hit, miss],
+        is_information_action=False,
+    )
 
 
 def test_action_ranking_respects_budget_feasibility():
@@ -101,6 +107,42 @@ def test_no_feasible_action_raises():
         assert False, "expected ValueError for no feasible action"
     except ValueError:
         pass
+
+
+def test_information_action_uses_best_terminal_decision_after_outcome():
+    """A perfect survey must enable the switch from A to B and yield net VOI $5."""
+    belief = BeliefState(posterior={
+        Hypothesis.H1_SHALLOW_SUPERGENE: 0.5,
+        Hypothesis.H2_DEEP_HYPOGENE_PORPHYRY: 0.5,
+        Hypothesis.H3_LOCALIZED_NONECONOMIC: 0.0,
+        Hypothesis.H4_INSUFFICIENT_EVIDENCE: 0.0,
+    })
+    no_cost = ActionCost(0.0, 0, ParamProvenance.ASSUMPTION)
+    action_a = CandidateAction("action_A", "develop", no_cost, [], is_information_action=False)
+    action_b = CandidateAction("action_B", "farm_out", no_cost, [], is_information_action=False)
+    hold = CandidateAction("hold", "hold", no_cost, [], is_information_action=False)
+    survey = CandidateAction(
+        "perfect_survey",
+        "geophysical_survey",
+        ActionCost(25.0, 1, ParamProvenance.ASSUMPTION),
+        [
+            OutcomeScenario("H1", {Hypothesis.H1_SHALLOW_SUPERGENE: 1.0, Hypothesis.H2_DEEP_HYPOGENE_PORPHYRY: 0.0}),
+            OutcomeScenario("H2", {Hypothesis.H1_SHALLOW_SUPERGENE: 0.0, Hypothesis.H2_DEEP_HYPOGENE_PORPHYRY: 1.0}),
+        ],
+        is_information_action=True,
+    )
+    from mdex.economics import ActionSpecificEconomicModel
+    econ = ActionSpecificEconomicModel({
+        "action_A": {Hypothesis.H1_SHALLOW_SUPERGENE: 100.0, Hypothesis.H2_DEEP_HYPOGENE_PORPHYRY: 0.0},
+        "action_B": {Hypothesis.H1_SHALLOW_SUPERGENE: 0.0, Hypothesis.H2_DEEP_HYPOGENE_PORPHYRY: 60.0},
+    }, budget_remaining_usd=1_000.0)
+
+    survey_evaluation = next(
+        evaluation for evaluation in rank_actions(belief, [action_a, action_b, hold, survey], econ, [])
+        if evaluation.action.name == "perfect_survey"
+    )
+    assert survey_evaluation.voi_usd == 5.0
+    assert survey_evaluation.total_value_usd == 5.0
 
 
 def test_sequential_replay_is_reproducible():

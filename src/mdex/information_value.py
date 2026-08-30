@@ -46,6 +46,17 @@ class CandidateAction:
     cost: ActionCost
     outcome_scenarios: list[OutcomeScenario]
     description: str = ""
+    is_information_action: bool | None = None
+
+
+_INFORMATION_ACTION_KINDS = {"drill_hole", "geophysical_survey", "geochemical_sampling"}
+
+
+def action_is_information(action: CandidateAction) -> bool:
+    """Return the explicit action role, falling back to the legacy kind mapping."""
+    if action.is_information_action is not None:
+        return action.is_information_action
+    return action.kind in _INFORMATION_ACTION_KINDS
 
 
 def _outcome_prior_probability(belief: BeliefState, scenario: OutcomeScenario) -> float:

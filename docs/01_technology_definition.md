@@ -52,9 +52,10 @@ See `docs/architecture.md` for the full diagram and module contracts. Summary of
 Evidence (timestamped, provenance-tagged)
    -> Temporal Filter (firewall at decision time T)
    -> Belief Engine (posterior over H1..H4)
-   -> Candidate Action Generator
-   -> Information Value Engine (expected uncertainty reduction per action)
-   -> Economic Engine (cost, budget, expected monetary value)
+   -> Information Actions -> possible outcomes -> posterior beliefs
+   -> Best available Terminal Decision (including hold = $0 outside option)
+   -> Information Value Engine (decision-theoretic pre-posterior VOI)
+   -> Economic Engine (cost, budget, terminal expected monetary value)
    -> Decision Engine (rank actions by expected decision value)
    -> Recommended Action + rationale
    -> [Replay] reveal next historical evidence -> new state T+1 -> repeat
@@ -64,7 +65,7 @@ Evidence (timestamped, provenance-tagged)
 
 - Discrete Bayesian updating over a finite hypothesis set (categorical posterior, likelihood functions authored per evidence type).
 - Shannon entropy as the uncertainty measure over the hypothesis posterior.
-- Value of Information (VOI): `VOI(a) = E[OptimalDecision(posterior after outcome of a)] - OptimalDecision(current belief) - cost(a)`, computed via discrete pre-posterior decision-theoretic calculation over enumerated evidence outcomes. This differs from simpler "expected uncertainty reduction" metrics by measuring the actual improvement in decision value, not just information quantity.
+- Value of Information (VOI): `VOI(I) = E_y[BestTerminalDecisionValue(posterior | y)] - BestTerminalDecisionValue(prior) - Cost(I)`, computed via discrete pre-posterior decision-theoretic calculation over enumerated evidence outcomes. Information actions purchase observations and are never evaluated as terminal payoff actions; `hold` is the zero-valued outside option.
 - Expected monetary value (EMV) combining hypothesis-conditional economic payoff, probability, and cost.
 - A simple single-step-lookahead ranking (VOI for information actions, direct EMV for terminal actions) used as the action-selection rule, explicitly `[ASSUMPTION]`-flagged as one reasonable rule among several (a full POMDP solve is out of scope for TRL 3 and is listed as TRL 4+ work).
 
@@ -80,6 +81,7 @@ Evidence (timestamped, provenance-tagged)
 - Only one historical case (Oyu Tolgoi, one decision point) is reconstructed with real citations in this POC; broader validation requires more cases.
 - The sequential decision rule is a myopic (one-step-lookahead) VOI/EMV ranking, not a full sequential (POMDP) optimum — sufficient to prove the loop, not to claim globally optimal sequencing.
 - No live geophysical/geochemical data ingestion pipeline exists; ingestion is via structured files with a documented schema.
+- The Oyu Tolgoi replay currently represents information actions and `hold`, but no calibrated post-information economic terminal decision beyond `hold`; its information-action VOI therefore remains cost-only. The analytical integration test validates the general terminal-decision pathway independently.
 
 ## 10. TRL 3 Target (this POC)
 
