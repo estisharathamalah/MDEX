@@ -138,8 +138,20 @@ def build_candidate_actions(econ_cfg: dict) -> list[CandidateAction]:
         kind="geophysical_survey",
         cost=ActionCost(survey_cfg["cost_usd"], survey_cfg["duration_days"], ParamProvenance(survey_cfg["provenance"])),
         outcome_scenarios=[
-            OutcomeScenario("anomaly_confirmed", {h: 0.6 for h in Hypothesis}),
-            OutcomeScenario("no_anomaly", {h: 0.4 for h in Hypothesis}),
+            # If survey shows anomaly: favors H2 (porphyry) which is the economically valuable target
+            OutcomeScenario("anomaly_confirmed", {
+                Hypothesis.H1_SHALLOW_SUPERGENE: 0.1,
+                Hypothesis.H2_DEEP_HYPOGENE_PORPHYRY: 0.75,  # strongly favors porphyry
+                Hypothesis.H3_LOCALIZED_NONECONOMIC: 0.1,
+                Hypothesis.H4_INSUFFICIENT_EVIDENCE: 0.05,
+            }),
+            # If survey shows no anomaly: favors negative hypotheses (non-economic or insufficient)
+            OutcomeScenario("no_anomaly", {
+                Hypothesis.H1_SHALLOW_SUPERGENE: 0.4,
+                Hypothesis.H2_DEEP_HYPOGENE_PORPHYRY: 0.1,  # low probability of porphyry
+                Hypothesis.H3_LOCALIZED_NONECONOMIC: 0.4,
+                Hypothesis.H4_INSUFFICIENT_EVIDENCE: 0.1,
+            }),
         ],
         description="Run an additional IP/magnetic survey before committing a deep hole.",
     )
@@ -182,10 +194,12 @@ def main():
 
     print("Ranked actions:")
     for ev in ranked:
+        type_label = "info" if ev.is_information_action else "term"
         print(
             f"  [{'FEASIBLE' if ev.feasible else 'INFEASIBLE':10}] "
-            f"{ev.action.name:28} EDV=${ev.expected_decision_value_usd:>14,.0f}  "
-            f"EVOI=${ev.evoi_usd:>13,.0f}  EMV=${ev.emv_usd:>14,.0f}  "
+            f"{ev.action.name:28} ({type_label}) "
+            f"Value=${ev.total_value_usd:>14,.0f}  "
+            f"VOI=${ev.voi_usd:>13,.0f}  "
             f"dEntropy={ev.uncertainty_reduction_bits:.3f}"
         )
 
@@ -203,6 +217,7 @@ def main():
         mdex_rec=rec,
         ranked_by_mdex=ranked,
         candidate_actions=actions,
+        belief_state=belief,
         econ=econ,
         historical_decision=historical_decision,
         historical_outcome_summary=outcome_summary,
@@ -231,10 +246,11 @@ def main():
                 "ranked_actions": [
                     {
                         "action": ev.action.name,
+                        "action_type": "information" if ev.is_information_action else "terminal",
                         "feasible": ev.feasible,
-                        "expected_decision_value_usd": ev.expected_decision_value_usd,
-                        "evoi_usd": ev.evoi_usd,
-                        "emv_usd": ev.emv_usd,
+                        "total_value_usd": ev.total_value_usd,
+                        "voi_usd": ev.voi_usd,
+                        "action_value_usd": ev.action_value_usd,
                         "uncertainty_reduction_bits": ev.uncertainty_reduction_bits,
                     }
                     for ev in ranked

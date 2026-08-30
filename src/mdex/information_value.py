@@ -1,10 +1,16 @@
 """
 Information Value Engine.
 
-Implements a discrete pre-posterior Value-of-Information calculation
-(Howard-style VOI) for candidate exploration actions:
+Implements a decision-theoretically correct discrete pre-posterior
+Value-of-Information calculation (Howard 1966 framework) for candidate
+exploration actions:
 
-  EVOI(a) = E_outcomes[ EMV(decision | posterior after outcome) ] - EMV(decision | current belief)
+  VOI(a) = E_outcomes[ OptimalDecision(posterior after outcome) ]
+           - OptimalDecision(current belief)
+           - cost(a)
+
+where "OptimalDecision(belief)" means:
+  max over feasible actions of [EMV(belief, action) - cost(action)]
 
 Because full outcome spaces for real assays are continuous, this POC
 discretizes each action's possible outcomes into a small enumerated set
@@ -12,6 +18,12 @@ discretizes each action's possible outcomes into a small enumerated set
 probabilities derived from the current belief and a hand-authored
 likelihood table. This discretization is an explicit [ASSUMPTION] and is
 documented per action definition.
+
+Key difference from previous implementation:
+The prior version computed: E[EMV(posterior)] - E[EMV(prior)].
+The correct version computes: E[max_action(EMV(posterior, action))] - max_action(EMV(prior, action)).
+This ensures that VOI reflects the value of making a BETTER decision after the information,
+not merely the change in economic estimate.
 """
 from dataclasses import dataclass
 from typing import Callable
@@ -54,31 +66,79 @@ def expected_uncertainty_reduction(belief: BeliefState, action: CandidateAction)
     return max(0.0, current_entropy - expected_posterior_entropy)
 
 
-def evoi(belief: BeliefState, action: CandidateAction, econ: EconomicModel) -> float:
-    """Expected Value of Information for a candidate action, in USD.
-
-    EVOI = E[best achievable EMV after the action's outcome is known]
-           - best achievable EMV under current belief (i.e. taking no further action)
-
-    In this simplified single-action-lookahead POC, "best achievable EMV"
-    collapses to the EMV of proceeding with the current best economic
-    payoff estimate; the action's own cost is netted separately by the
-    Economic Engine / Decision Engine, not double-counted here.
+def _best_action_value(belief: BeliefState, candidate_actions: list[CandidateAction], econ: EconomicModel) -> float:
     """
-    prior_emv = econ.expected_monetary_value(belief, ActionCost(0.0, 0, cost_provenance_placeholder()))
-    expected_posterior_emv = 0.0
-    for scenario in action.outcome_scenarios:
+    Compute the value of the best feasible action under the current belief.
+    
+    Value of action a = EMV(belief, a) - cost(a)
+    
+    Returns the maximum value over all feasible actions, or 0 if none are feasible.
+    """
+    if not candidate_actions:
+        return 0.0
+    
+    best_value = 0.0  # default: hold / do nothing
+    for action in candidate_actions:
+        if not econ.feasible(action.cost):
+            continue
+        action_value = econ.expected_monetary_value(belief, action.cost)
+        # Note: econ.expected_monetary_value already subtracts cost
+        best_value = max(best_value, action_value)
+    
+    return best_value
+
+
+def voi_for_information_action(
+    belief: BeliefState,
+    information_action: CandidateAction,
+    follow_on_actions: list[CandidateAction],
+    econ: EconomicModel,
+) -> float:
+    """
+    Compute the true decision-theoretic Value of Information (VOI) for an information-gathering action.
+    
+    VOI(information_action) 
+        = E_outcomes[ BestActionValue(posterior after outcome) ]
+          - BestActionValue(current belief)
+          - cost(information_action)
+    
+    where BestActionValue(belief) = max over feasible a in follow_on_actions of [EMV(belief, a) - cost(a)].
+    
+    Args:
+        belief: Current belief state.
+        information_action: The action that gathers information (drill, survey, etc.).
+        follow_on_actions: The set of actions available AFTER the information is received.
+                          These must include the original candidate actions (so that "do nothing"
+                          remains an option if all other actions become unattractive).
+        econ: Economic model with budget, payoffs, etc.
+    
+    Returns:
+        Expected value of information in USD. Can be negative if the information is not valuable
+        or if the action is too expensive.
+    """
+    # Current best achievable value without the information
+    current_best_value = _best_action_value(belief, follow_on_actions, econ)
+    
+    # Expected value after acquiring information
+    expected_posterior_best_value = 0.0
+    
+    for scenario in information_action.outcome_scenarios:
         p_outcome = _outcome_prior_probability(belief, scenario)
         if p_outcome <= 0:
             continue
+        
+        # Update belief based on this outcome scenario
         posterior = bayes_update(belief.posterior, scenario.probability_by_hypothesis)
         posterior_belief = BeliefState(posterior=posterior)
-        posterior_emv = econ.expected_monetary_value(posterior_belief, ActionCost(0.0, 0, cost_provenance_placeholder()))
-        expected_posterior_emv += p_outcome * posterior_emv
-    return expected_posterior_emv - prior_emv
-
-
-def cost_provenance_placeholder():
-    # local import to avoid circularity in type-checking-only contexts
-    from .economics import ParamProvenance
-    return ParamProvenance.ASSUMPTION
+        
+        # What is the best action we can take with this posterior belief?
+        posterior_best_value = _best_action_value(posterior_belief, follow_on_actions, econ)
+        
+        # Weight by outcome probability
+        expected_posterior_best_value += p_outcome * posterior_best_value
+    
+    # VOI = expected future value - current best value - cost
+    # The cost is subtracted exactly once here, not separately in the decision engine
+    voi = expected_posterior_best_value - current_best_value - information_action.cost.amount_usd
+    
+    return voi

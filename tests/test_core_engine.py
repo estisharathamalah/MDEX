@@ -120,7 +120,7 @@ def test_sequential_replay_is_reproducible():
         engine = ReplayEngine(store, likelihood_fn, econ_factory())
         prior = BeliefState(posterior=uniform_prior())
         belief, rec = engine.step(date(2001, 7, 1), prior, actions)
-        return belief.as_dict(), rec.action.name, rec.expected_decision_value_usd
+        return belief.as_dict(), rec.action.name, rec.total_value_usd
 
     result_1 = run_once()
     result_2 = run_once()
@@ -148,6 +148,7 @@ def test_baseline_evaluation_reports_disagreement_when_present():
         mdex_rec=rec,
         ranked_by_mdex=ranked,
         candidate_actions=actions,
+        belief_state=belief,
         econ=econ,
         historical_decision="some_other_action_never_in_candidates",
         historical_outcome_summary="synthetic outcome for unit test",

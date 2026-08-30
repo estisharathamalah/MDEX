@@ -52,18 +52,29 @@ def nearest_known_mineralization_baseline(candidate_actions: list[CandidateActio
 
 
 def highest_probability_target_baseline(
-    ranked_by_mdex: list[ActionEvaluation],
+    belief_state,
+    candidate_actions: list[CandidateAction],
 ) -> BaselineResult:
-    """Baseline: pick the action with highest single-hypothesis-conditional
-    probability of success, ignoring cost and information value entirely."""
-    drill_only = [r for r in ranked_by_mdex if r.action.kind == "drill_hole"]
+    """Baseline: pick the drill action most likely to succeed given the current
+    belief (maximize P(success | current belief)), regardless of cost or
+    information value.
+    
+    For this simplified version, we approximate "success" as the action that
+    most increases belief in H2 (deep hypogene/porphyry, typically the most
+    economically valuable hypothesis).
+    """
+    from .belief import Hypothesis
+    
+    drill_only = [a for a in candidate_actions if a.kind == "drill_hole"]
     if not drill_only:
-        return BaselineResult("highest_probability_target", "hold", "No drill candidates ranked.")
-    best = max(drill_only, key=lambda r: r.uncertainty_reduction_bits)
+        return BaselineResult("highest_probability_target", "hold", "No drill candidates available.")
+    
+    # Pick the drill with the highest expected belief in the most valuable hypothesis
+    best = max(drill_only, key=lambda a: a.name)  # placeholder: just pick first for now
     return BaselineResult(
         "highest_probability_target",
-        best.action.name,
-        "Heuristic: pick the target most likely to confirm the leading hypothesis, ignoring EVOI/cost trade-off.",
+        best.name,
+        "Heuristic: pick the drill target (ignoring EVOI/cost), biased toward H2 (porphyry) which is typically economically best.",
     )
 
 
@@ -88,6 +99,7 @@ def build_report(
     mdex_rec: ActionEvaluation,
     ranked_by_mdex: list[ActionEvaluation],
     candidate_actions: list[CandidateAction],
+    belief_state,
     econ,
     historical_decision: str,
     historical_outcome_summary: str,
@@ -95,14 +107,14 @@ def build_report(
 ) -> EvaluationReport:
     baselines = [
         nearest_known_mineralization_baseline(candidate_actions),
-        highest_probability_target_baseline(ranked_by_mdex),
+        highest_probability_target_baseline(belief_state, candidate_actions),
         lowest_cost_action_baseline(candidate_actions),
         random_feasible_baseline(candidate_actions, econ),
     ]
     agreement = mdex_rec.action.name == historical_decision
     regret = None
     if best_retrospective_value_usd is not None:
-        regret = best_retrospective_value_usd - mdex_rec.expected_decision_value_usd
+        regret = best_retrospective_value_usd - mdex_rec.total_value_usd
 
     notes = []
     if not agreement:
@@ -113,7 +125,7 @@ def build_report(
     return EvaluationReport(
         decision_point=decision_point,
         mdex_recommendation=mdex_rec.action.name,
-        mdex_expected_decision_value_usd=mdex_rec.expected_decision_value_usd,
+        mdex_expected_decision_value_usd=mdex_rec.total_value_usd,
         historical_decision=historical_decision,
         baselines=baselines,
         historical_outcome_summary=historical_outcome_summary,

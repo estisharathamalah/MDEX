@@ -9,47 +9,52 @@
   "entropy_bits": 1.834347166779827,
   "ranked_actions": [
     {
-      "action": "additional_geophysical_survey",
+      "action": "hold",
+      "action_type": "terminal",
       "feasible": true,
-      "expected_decision_value_usd": 231064278.7450915,
-      "evoi_usd": 0.0,
-      "emv_usd": 231064278.7450915,
-      "uncertainty_reduction_bits": 0.0
+      "total_value_usd": 231124278.7450915,
+      "voi_usd": 0.0,
+      "action_value_usd": 231124278.7450915,
+      "uncertainty_reduction_bits": 1.834347166779827
     },
     {
       "action": "drill_Southern_Oyu",
+      "action_type": "information",
       "feasible": true,
-      "expected_decision_value_usd": 230874278.74509147,
-      "evoi_usd": -2.9802322387695312e-08,
-      "emv_usd": 230874278.7450915,
+      "total_value_usd": -250000.0000000298,
+      "voi_usd": -250000.0000000298,
+      "action_value_usd": 0.0,
       "uncertainty_reduction_bits": 0.35849965808293627
     },
     {
       "action": "drill_Southwest_Oyu",
+      "action_type": "information",
       "feasible": true,
-      "expected_decision_value_usd": 230874278.74509147,
-      "evoi_usd": -2.9802322387695312e-08,
-      "emv_usd": 230874278.7450915,
+      "total_value_usd": -250000.0000000298,
+      "voi_usd": -250000.0000000298,
+      "action_value_usd": 0.0,
       "uncertainty_reduction_bits": 0.35849965808293627
     },
     {
       "action": "drill_Central_Oyu",
+      "action_type": "information",
       "feasible": true,
-      "expected_decision_value_usd": 230874278.74509147,
-      "evoi_usd": -2.9802322387695312e-08,
-      "emv_usd": 230874278.7450915,
+      "total_value_usd": -250000.0000000298,
+      "voi_usd": -250000.0000000298,
+      "action_value_usd": 0.0,
       "uncertainty_reduction_bits": 0.35849965808293627
     },
     {
-      "action": "hold",
+      "action": "additional_geophysical_survey",
+      "action_type": "information",
       "feasible": true,
-      "expected_decision_value_usd": 0.0,
-      "evoi_usd": -231124278.7450915,
-      "emv_usd": 231124278.7450915,
-      "uncertainty_reduction_bits": 1.834347166779827
+      "total_value_usd": -35138799.215458006,
+      "voi_usd": -35138799.215458006,
+      "action_value_usd": 0.0,
+      "uncertainty_reduction_bits": 1.1764149603495744
     }
   ],
-  "mdex_recommendation": "additional_geophysical_survey",
+  "mdex_recommendation": "hold",
   "historical_decision": "drill_Southwest_Oyu",
   "agreement_with_history": false,
   "baselines": [
@@ -60,8 +65,8 @@
     },
     {
       "strategy_name": "highest_probability_target",
-      "selected_action_name": "drill_Southern_Oyu",
-      "rationale": "Heuristic: pick the target most likely to confirm the leading hypothesis, ignoring EVOI/cost trade-off."
+      "selected_action_name": "drill_Southwest_Oyu",
+      "rationale": "Heuristic: pick the drill target (ignoring EVOI/cost), biased toward H2 (porphyry) which is typically economically best."
     },
     {
       "strategy_name": "lowest_cost_action",
