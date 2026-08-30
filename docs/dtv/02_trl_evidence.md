@@ -8,8 +8,8 @@
 |---|---|
 | Critical functions demonstrated | `src/mdex/{evidence,belief,information_value,economics,decision_engine,replay,evaluation}.py` implement the full loop described in `docs/architecture.md` |
 | Experimental validation | `experiments/run_oyu_tolgoi_experiment.py` runs the full pipeline end-to-end against a historically-grounded decision point and produces a reproducible, machine-readable result (`results/oyu_tolgoi_experiment_result.json`) |
-| Analytical results | Belief posterior, entropy, EVOI, EMV, and expected decision value are all computed and reported per candidate action, with rationale text |
-| Test evidence | 9 automated tests pass (`tests/test_temporal_firewall.py`, `tests/test_core_engine.py`), covering the temporal firewall (mandatory), Bayesian update correctness, budget-constraint enforcement, action ranking, sequential-replay reproducibility, and baseline/disagreement reporting |
+| Analytical results | Belief posterior, entropy, VOI, EMV, and total value are all computed and reported per candidate action, with rationale text |
+| Test evidence | 12 automated tests pass: `tests/test_voi_correctness.py` (3 mathematical VOI ground-truth tests including positive/negative VOI scenarios), `tests/test_core_engine.py` (6 tests covering Bayesian update, budget constraints, action ranking, reproducibility), `tests/test_temporal_firewall.py` (3 tests enforcing temporal integrity). These cover the temporal firewall (mandatory), VOI mathematical correctness, Bayesian update correctness, budget-constraint enforcement, action ranking, sequential-replay reproducibility, and baseline/disagreement reporting |
 
 ## TRL 4 — Component validation in a laboratory environment
 

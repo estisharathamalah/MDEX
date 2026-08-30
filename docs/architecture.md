@@ -26,7 +26,7 @@
 ┌───────────────────────────┐                    ┌───────────────────────────┐
 │ Information Value Engine  │                    │  Economic Engine          │
 │ (information_value.py)    │                    │  (economics.py)           │
-│ EVOI per candidate action │                    │  cost, budget, EMV        │
+│ VOI per candidate action  │                    │  cost, budget, EMV        │
 └──────────────┬─────────────┘                   └──────────────┬────────────┘
                └───────────────────────┬──────────────────────────┘
                                         ▼
@@ -67,7 +67,7 @@
 ### `information_value.py`
 - `enumerate_outcomes(action, belief)`: for a candidate action, enumerate plausible evidence outcomes and their probabilities under current belief (a discretized pre-posterior).
 - `expected_uncertainty_reduction(action, belief) -> float`: expected drop in entropy.
-- `evoi(action, belief, econ_model) -> float`: expected value of information in decision-value units (monetary, via the economic engine's payoff function), following the standard pre-posterior VOI construction.
+- `voi_for_information_action(belief, information_action, terminal_actions, econ) -> float`: true decision-theoretic Value of Information (VOI) in decision-value units (monetary), following the Howard (1966) pre-posterior construction: VOI = E[OptimalDecision(posterior)] - OptimalDecision(prior) - cost.
 
 ### `economics.py`
 - `ActionCost`: cost, duration, and a `provenance` tag (historical figure vs. `[ASSUMPTION]` default from `configs/economics.yaml`).
@@ -75,7 +75,7 @@
 - `feasible(action_cost, remaining_budget) -> bool`: hard budget constraint enforcement.
 
 ### `decision_engine.py`
-- `rank_actions(belief, candidate_actions, econ_model) -> List[ActionEvaluation]`, each item carrying: action, EVOI, cost, EMV, expected_decision_value (a documented combination rule), uncertainty, rationale (auto-generated text trace), assumptions used, evidence provenance list.
+- `rank_actions(belief, candidate_actions, econ_model) -> List[ActionEvaluation]`, each item carrying: action, voi_usd (for information actions) or action_value_usd (for terminal actions), cost, expected uncertainty reduction, rationale (auto-generated text trace), assumptions used, evidence provenance list.
 - `recommend(...) -> ActionEvaluation`: top of the ranked list subject to budget feasibility.
 
 ### `replay.py`

@@ -97,7 +97,7 @@ def _best_action_value(belief: BeliefState, terminal_actions: list[CandidateActi
             continue
         if not econ.feasible(action.cost):
             continue
-        action_value = econ.expected_monetary_value(belief, action.cost)
+        action_value = econ.expected_monetary_value(belief, action.cost, action)
         best_value = max(best_value, action_value)
     
     return best_value

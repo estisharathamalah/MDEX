@@ -66,7 +66,7 @@
     {
       "strategy_name": "highest_probability_target",
       "selected_action_name": "drill_Southwest_Oyu",
-      "rationale": "Heuristic: pick the drill target (ignoring EVOI/cost), biased toward H2 (porphyry) which is typically economically best."
+      "rationale": "Heuristic: pick the drill target (ignoring VOI/cost), biased toward H2 (porphyry) which is typically economically best."
     },
     {
       "strategy_name": "lowest_cost_action",

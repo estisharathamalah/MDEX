@@ -64,9 +64,9 @@ Evidence (timestamped, provenance-tagged)
 
 - Discrete Bayesian updating over a finite hypothesis set (categorical posterior, likelihood functions authored per evidence type).
 - Shannon entropy as the uncertainty measure over the hypothesis posterior.
-- Expected Value of Information: `EVOI(a) = E[value of decision | after observing outcome of a] - value of decision now`, approximated in this POC via a discrete pre-posterior calculation over enumerated evidence outcomes.
+- Value of Information (VOI): `VOI(a) = E[OptimalDecision(posterior after outcome of a)] - OptimalDecision(current belief) - cost(a)`, computed via discrete pre-posterior decision-theoretic calculation over enumerated evidence outcomes. This differs from simpler "expected uncertainty reduction" metrics by measuring the actual improvement in decision value, not just information quantity.
 - Expected monetary value (EMV) combining hypothesis-conditional economic payoff, probability, and cost.
-- A simple multi-attribute ranking (expected decision value per unit cost, i.e., an information/economic efficiency ratio) used as the action-selection rule, explicitly `[ASSUMPTION]`-flagged as one reasonable rule among several (a full POMDP solve is out of scope for TRL 3 and is listed as TRL 4+ work).
+- A simple single-step-lookahead ranking (VOI for information actions, direct EMV for terminal actions) used as the action-selection rule, explicitly `[ASSUMPTION]`-flagged as one reasonable rule among several (a full POMDP solve is out of scope for TRL 3 and is listed as TRL 4+ work).
 
 ## 8. Assumptions (global, POC-wide)
 

@@ -74,7 +74,7 @@ def highest_probability_target_baseline(
     return BaselineResult(
         "highest_probability_target",
         best.name,
-        "Heuristic: pick the drill target (ignoring EVOI/cost), biased toward H2 (porphyry) which is typically economically best.",
+        "Heuristic: pick the drill target (ignoring VOI/cost), biased toward H2 (porphyry) which is typically economically best.",
     )
 
 

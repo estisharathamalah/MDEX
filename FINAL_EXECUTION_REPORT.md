@@ -24,7 +24,7 @@ Candidate defensibility rests on the specific integration of a temporally-firewa
 - Single historical case, single decision point.
 - Per-site discriminating evidence in the primary experiment is synthetic, not sourced from real 2001 site-level geochemistry/geophysics (which was not obtainable in this session — see `docs/DATA_PROVENANCE.md`).
 - Likelihood tables and economic parameters are hand-authored `[ASSUMPTION]`s, not expert-elicited or corpus-fitted.
-- Decision rule is single-step-lookahead (additive EVOI + EMV), not a full sequential (POMDP) optimum.
+- Decision rule is single-step-lookahead (true VOI for information actions, direct EMV for terminal actions), not a full sequential (POMDP) optimum.
 - No market/customer validation has been conducted; `docs/dtv/04_market.md` states this explicitly rather than fabricating traction.
 
 ## H. Open issues
