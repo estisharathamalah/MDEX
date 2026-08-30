@@ -1,0 +1,21 @@
+{
+  "_provenance_note": "SYNTHETIC. These per-site surface-indication strength scores are illustrative test data constructed to exercise the belief-update and decision pipeline against the historically-grounded three-site choice described in data/historical/oyu_tolgoi_facts.json (F4). They are NOT a claim about the real 2001 surface geochemistry/alteration mapping at Southern Oyu, Central Oyu, or Southwest Oyu, which was not obtained in this session. Replace with licensed/archival data before treating any output as historically validated.",
+  "decision_date": "2001-07-01",
+  "sites": {
+    "Southern_Oyu": {
+      "surface_alteration_strength": 0.4,
+      "surface_cu_geochem_anomaly": 0.5,
+      "note": "SYNTHETIC placeholder indication strength, moderate."
+    },
+    "Southwest_Oyu": {
+      "surface_alteration_strength": 0.7,
+      "surface_cu_geochem_anomaly": 0.65,
+      "note": "SYNTHETIC placeholder indication strength, elevated (matches the historically-known fact that this was the site ultimately chosen, but the numeric strength itself is illustrative, not a transcribed 2001 geochemistry value)."
+    },
+    "Central_Oyu": {
+      "surface_alteration_strength": 0.55,
+      "surface_cu_geochem_anomaly": 0.45,
+      "note": "SYNTHETIC placeholder indication strength, moderate-elevated."
+    }
+  }
+}

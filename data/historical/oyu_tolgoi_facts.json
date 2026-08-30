@@ -1,0 +1,71 @@
+{
+  "case": "Oyu Tolgoi pre-OTD-150 decision (Southwest Oyu, South Gobi, Mongolia)",
+  "decision_date": "2001-07-01",
+  "facts": [
+    {
+      "id": "F1",
+      "kind": "historical_interpretation",
+      "description": "Ivanhoe Mines signed an option agreement with BHP Billiton to earn a 100% interest in the Oyu Tolgoi concession.",
+      "date_observed": "2000-05-01",
+      "date_available": "2000-05-01",
+      "source": "Turquoise Hill Resources, 'History', turquoisehill.com/turquoise-hill/history",
+      "provenance": "FACT",
+      "confidence": 0.95
+    },
+    {
+      "id": "F2",
+      "kind": "drill_hole",
+      "description": "Approximately 109 reverse-circulation holes completed, described as producing encouraging results.",
+      "date_observed": "2000-09-01",
+      "date_available": "2000-09-01",
+      "source": "Mining South East Europe, 'The story of the copper discovery at Oyu Tolgoi'",
+      "provenance": "FACT",
+      "confidence": 0.8,
+      "values": {"hole_count": 109, "method": "RC"}
+    },
+    {
+      "id": "F3",
+      "kind": "historical_interpretation",
+      "description": "149 holes completed prior to the discovery hole; exploration funding constrained to three deep diamond holes.",
+      "date_observed": "2001-06-15",
+      "date_available": "2001-06-15",
+      "source": "IndraStra Global, 'The Story of the Discovery of Oyu Tolgoi'",
+      "provenance": "FACT",
+      "confidence": 0.75,
+      "values": {"hole_count": 149, "affordable_deep_holes": 3}
+    },
+    {
+      "id": "F4",
+      "kind": "geological_observation",
+      "description": "Three deep diamond holes planned to test hypogene potential at Southern Oyu, Southwest Oyu, and Central Oyu; Southwest Oyu collar chosen with input from geologist D. Garamjav based on surface alteration/anomaly interpretation.",
+      "date_observed": "2001-06-20",
+      "date_available": "2001-06-20",
+      "source": "Turquoise Hill Resources 'History'; IndraStra Global",
+      "provenance": "FACT",
+      "confidence": 0.7,
+      "values": {"candidate_sites": ["Southern Oyu", "Southwest Oyu", "Central Oyu"]}
+    },
+    {
+      "id": "F5_FUTURE",
+      "kind": "assay",
+      "description": "OTD-150 (Southwest Oyu) drilled to 590 m; 508 m interval (70-578m) averaging >1 g/t Au and 0.81% Cu, including 278 m (188-466m) at >1.0% Cu and ~1.5 g/t Au.",
+      "date_observed": "2001-07-17",
+      "date_available": "2001-07-17",
+      "source": "Turquoise Hill Resources 'History'; Ivanhoe Mines news release 2001-07-17",
+      "provenance": "FACT",
+      "confidence": 0.9,
+      "values": {"hole": "OTD-150", "depth_m": 590, "interval_m": 508, "avg_au_gpt": 1.0, "avg_cu_pct": 0.81}
+    },
+    {
+      "id": "F6_FUTURE",
+      "kind": "historical_interpretation",
+      "description": "First independent resource audit (Southwest Oyu discovery zone): inferred 588 Mt at 0.53 g/t Au, 0.41% Cu (0.30% CuEq cutoff), ~10 Moz Au, ~5.3 Blb Cu.",
+      "date_observed": "2002-03-01",
+      "date_available": "2002-03-01",
+      "source": "Turquoise Hill Resources 'History'",
+      "provenance": "FACT",
+      "confidence": 0.9,
+      "values": {"tonnes_mt": 588, "au_gpt": 0.53, "cu_pct": 0.41}
+    }
+  ]
+}

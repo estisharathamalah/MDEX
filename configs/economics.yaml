@@ -1,0 +1,41 @@
+# Economic parameters for the Oyu Tolgoi pre-OTD-150 scenario.
+# provenance: HISTORICAL = documented figure, ASSUMPTION = configurable default.
+
+deep_diamond_hole:
+  cost_usd: 250000          # ASSUMPTION: illustrative cost for a ~600m deep diamond drill hole
+                              # in a remote Gobi Desert location circa 2001. No documented per-hole
+                              # cost figure for this specific campaign was located in this session.
+  duration_days: 30
+  provenance: ASSUMPTION
+
+geophysical_survey:
+  cost_usd: 60000
+  duration_days: 14
+  provenance: ASSUMPTION
+
+geochemical_sampling:
+  cost_usd: 15000
+  duration_days: 10
+  provenance: ASSUMPTION
+
+hold:
+  cost_usd: 0
+  duration_days: 0
+  provenance: ASSUMPTION
+
+budget_available_usd: 750000
+budget_provenance: ASSUMPTION   # "three affordable deep holes" (F3) implies a budget on the order
+                                  # of ~3x deep_diamond_hole.cost_usd; exact 2001 Ivanhoe exploration
+                                  # budget line-item for this campaign was not located in this session.
+
+# Hypothesis-conditional economic payoff, USD, if the campaign proceeds and that
+# hypothesis is confirmed. ASSUMPTION — order-of-magnitude illustrative figures
+# reflecting "large porphyry >> localized/non-economic", not a discounted-cashflow
+# valuation of the real Oyu Tolgoi project (which would use post-discovery data
+# unavailable at the 2001 decision point in any case).
+payoff_by_hypothesis_usd:
+  H1_shallow_supergene: 5000000
+  H2_deep_hypogene_porphyry: 500000000
+  H3_localized_noneconomic: 0
+  H4_insufficient_evidence: 0
+provenance: ASSUMPTION
