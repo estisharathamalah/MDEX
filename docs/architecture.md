@@ -62,7 +62,7 @@
 ### `belief.py`
 - `Hypothesis` enum: H1_SHALLOW_SUPERGENE, H2_DEEP_HYPOGENE, H3_LOCALIZED_NONECONOMIC, H4_INSUFFICIENT_EVIDENCE.
 - `BeliefState`: probability vector over the 4 hypotheses + entropy.
-- `update(prior, evidence_item, likelihood_table) -> posterior`: standard discrete Bayes rule. Likelihood tables are explicit, inspectable, and versioned in `configs/likelihoods.yaml`, each entry tagged `[ASSUMPTION]`.
+- `update(prior, evidence_item, likelihood_table) -> posterior`: standard discrete Bayes rule. Likelihood tables are explicit, hand-authored, and defined per evidence type within `src/mdex/evidence.py` and per outcome scenario within action definitions in `src/mdex/information_value.py`, each entry tagged `[ASSUMPTION]`. This is a documented TRL-3 simplification (see `docs/OPEN_ISSUES.md#likelihood-tables`).
 
 ### `information_value.py`
 - `enumerate_outcomes(action, belief)`: for a candidate action, enumerate plausible evidence outcomes and their probabilities under current belief (a discretized pre-posterior).

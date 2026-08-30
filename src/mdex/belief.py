@@ -5,8 +5,8 @@ Represents belief as a discrete probability distribution over a fixed set of
 competing geological hypotheses, and updates it via Bayes' rule as evidence
 (already filtered by the temporal firewall) is introduced.
 
-Likelihood tables are hand-authored, explicit, and versioned in
-configs/likelihoods.yaml. They are [ASSUMPTION]s, not fitted parameters —
+Likelihood tables are hand-authored, explicit, and defined within evidence item definitions
+and outcome scenarios. They are [ASSUMPTION]s, not fitted parameters —
 this is a documented TRL-3 simplification (see docs/OPEN_ISSUES.md).
 """
 import math

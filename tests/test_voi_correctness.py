@@ -20,19 +20,18 @@ from mdex.information_value import (
 )
 
 
-def test_voi_zero_when_information_is_not_valuable_and_cost_exceeds_benefit():
+def test_voi_is_negative_when_information_has_no_decision_value():
     """
-    Scenario: two actions with symmetric payoffs, perfect information has zero value
-    because the best action remains the same regardless.
+    Scenario: information provides no decision improvement; cost exceeds any benefit.
 
-    Action A: $100 if H1, $100 if H2 → value = $100 (constant)
-    Action B (information): costs $25, perfectly distinguishes H1/H2
+    Action A: $100 if H1, $100 if H2 → value = $100 (constant, no decision improvement from info)
+    Survey (information): costs $25, perfectly distinguishes H1/H2
     
     VOI = (expected value after info) - (value now) - cost
         = $100 - $100 - $25
         = -$25
     
-    Information is costly and provides no decision improvement.
+    Information is costly and provides no decision improvement → negative net VOI.
     """
     belief = BeliefState(posterior={
         Hypothesis.H1_SHALLOW_SUPERGENE: 0.5,
@@ -85,10 +84,10 @@ def test_voi_zero_when_information_is_not_valuable_and_cost_exceeds_benefit():
     
     voi = voi_for_information_action(belief, info_action, [action_a], econ)
     
-    # Expected VOI ≈ -$25 (cost exceeds any benefit)
+    # Ground-truth assertion: VOI must be exactly -$25
+    print(f"✓ test_voi_is_negative_when_information_has_no_decision_value: VOI = ${voi:.2f} (expected -$25)")
     assert voi < 0, f"VOI should be negative when cost exceeds benefit, got {voi}"
     assert abs(voi - (-25.0)) < 0.01, f"Expected VOI ≈ -$25, got {voi}"
-    print(f"✓ test_voi_zero_when_information_is_not_valuable: VOI = ${voi:.2f} (expected ≈ -$25)")
 
 
 def test_voi_positive_with_decision_change_ground_truth():
@@ -264,7 +263,7 @@ def test_voi_respects_budget_constraint():
 
 
 if __name__ == "__main__":
-    test_voi_zero_when_information_is_not_valuable_and_cost_exceeds_benefit()
+    test_voi_is_negative_when_information_has_no_decision_value()
     test_voi_positive_with_decision_change_ground_truth()
     test_voi_respects_budget_constraint()
     print("\n✓ All VOI correctness tests passed!")
